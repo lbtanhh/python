@@ -151,7 +151,8 @@ sys.stdout = sys.__stdout__
 
     // Trim output và loại bỏ ký tự null/whitespace thừa
     if (output) {
-      output = output.toString().trim().replace(/\x00/g, '');
+      // Tránh regex có control char (ESLint: no-control-regex)
+      output = output.toString().trim().split('\x00').join('');
     }
 
     return { output: output || '', error };

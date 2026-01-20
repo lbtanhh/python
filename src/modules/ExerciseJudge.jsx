@@ -70,7 +70,6 @@ const ExerciseJudge = () => {
     try {
       const results = [];
       let allPassed = true;
-      let firstError = null;
       let firstFailedTest = null;
 
       // Chạy tất cả hidden tests
@@ -94,7 +93,6 @@ const ExerciseJudge = () => {
 
         if (!passed && allPassed) {
           allPassed = false;
-          firstError = result.error;
           firstFailedTest = i + 1;
           
           // Hiển thị output của test đầu tiên bị lỗi

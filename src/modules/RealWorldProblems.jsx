@@ -10,6 +10,7 @@ import { runPython } from '../utils/pyodideHelper';
 const RealWorldProblems = () => {
   const [selectedProblem, setSelectedProblem] = useState(realWorldProblems[0]);
   const [code, setCode] = useState(selectedProblem.starterCode);
+  const [stdin, setStdin] = useState('');
   const [output, setOutput] = useState('');
   const [error, setError] = useState(null);
   const [isRunning, setIsRunning] = useState(false);
@@ -17,9 +18,45 @@ const RealWorldProblems = () => {
   const [statusMessage, setStatusMessage] = useState('');
   const [showSolution, setShowSolution] = useState(false);
 
+  const getDefaultInputForProblem = (problem) => {
+    if (!problem) return '';
+    switch (problem.id) {
+      case 1: // Tính tiền nước
+        return '25';
+      case 2: // Xếp loại học sinh
+        return '7.5';
+      case 4: // Tính tổng tiền mua hàng
+        return '3\n10000\n15000\n20000';
+      case 5: // Tìm số lớn nhất
+        return '5\n8\n3\n9\n2';
+      case 12: // Đếm từ trong câu
+        return 'Python là ngôn ngữ lập trình';
+      case 13: // Kiểm tra mật khẩu
+        return 'MyPass123';
+      case 14: { // Game đoán số
+        const secret = Math.floor(Math.random() * 100) + 1;
+        let guesses = [];
+        let current = 50;
+        for (let i = 0; i < 10 && current !== secret; i++) {
+          guesses.push(String(current));
+          if (current < secret) {
+            current = Math.min(current + Math.floor((secret - current) / 2), secret);
+          } else {
+            current = Math.max(current - Math.floor((current - secret) / 2), secret);
+          }
+        }
+        guesses.push(String(secret));
+        return guesses.join('\n');
+      }
+      default:
+        return '';
+    }
+  };
+
   // Reset code khi chọn bài khác
   useEffect(() => {
     setCode(selectedProblem.starterCode);
+    setStdin(getDefaultInputForProblem(selectedProblem));
     setOutput('');
     setError(null);
     setStatus(null);
@@ -36,51 +73,7 @@ const RealWorldProblems = () => {
     setStatusMessage('');
 
     try {
-      // Tạo input mẫu dựa trên bài toán
-      let inputString = '';
-      
-      // Tạo input phù hợp với từng bài
-      switch (selectedProblem.id) {
-        case 1: // Tính tiền nước
-          inputString = '25';
-          break;
-        case 2: // Xếp loại học sinh
-          inputString = '7.5';
-          break;
-        case 4: // Tính tổng tiền mua hàng
-          inputString = '3\n10000\n15000\n20000';
-          break;
-        case 5: // Tìm số lớn nhất
-          inputString = '5\n8\n3\n9\n2';
-          break;
-        case 12: // Đếm từ trong câu
-          inputString = 'Python là ngôn ngữ lập trình';
-          break;
-        case 13: // Kiểm tra mật khẩu
-          inputString = 'MyPass123';
-          break;
-        case 14: // Game đoán số
-          // Tạo số ngẫu nhiên và các lần đoán
-          const secret = Math.floor(Math.random() * 100) + 1;
-          // Tạo các lần đoán hợp lý
-          let guesses = [];
-          let current = 50;
-          for (let i = 0; i < 10 && current !== secret; i++) {
-            guesses.push(String(current));
-            if (current < secret) {
-              current = Math.min(current + Math.floor((secret - current) / 2), secret);
-            } else {
-              current = Math.max(current - Math.floor((current - secret) / 2), secret);
-            }
-          }
-          guesses.push(String(secret)); // Đoán đúng
-          inputString = guesses.join('\n');
-          break;
-        default:
-          inputString = '';
-      }
-
-      const result = await runPython(code, inputString);
+      const result = await runPython(code, stdin);
 
       if (result.error) {
         setError(result.error);
@@ -241,6 +234,8 @@ const RealWorldProblems = () => {
             onChange={setCode}
             onRun={handleRun}
             isRunning={isRunning}
+            stdin={stdin}
+            onStdinChange={setStdin}
           />
         </div>
 

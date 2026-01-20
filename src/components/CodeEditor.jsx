@@ -1,19 +1,11 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useRef } from 'react';
 
 /**
  * CodeEditor Component - Editor để viết Python code
  * Sử dụng textarea đơn giản với syntax highlighting cơ bản
  */
-const CodeEditor = ({ code, onChange, onRun, isRunning }) => {
+const CodeEditor = ({ code, onChange, onRun, isRunning, stdin, onStdinChange }) => {
   const textareaRef = useRef(null);
-
-  // Auto-resize textarea
-  useEffect(() => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
-      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
-    }
-  }, [code]);
 
   // Handle Tab key để thụt lề
   const handleKeyDown = (e) => {
@@ -37,7 +29,7 @@ const CodeEditor = ({ code, onChange, onRun, isRunning }) => {
   };
 
   return (
-    <div className="flex flex-col h-full bg-gray-900 text-gray-100">
+    <div className="flex flex-col h-full bg-gray-900 text-gray-100 overflow-hidden">
       {/* Toolbar */}
       <div className="bg-gray-800 px-4 py-2 flex items-center justify-between border-b border-gray-700">
         <div className="flex items-center space-x-2">
@@ -58,21 +50,38 @@ const CodeEditor = ({ code, onChange, onRun, isRunning }) => {
       </div>
 
       {/* Editor */}
-      <div className="flex-1 relative overflow-auto">
+      <div className="flex-1 relative overflow-hidden">
         <textarea
           ref={textareaRef}
           value={code}
           onChange={(e) => onChange(e.target.value)}
           onKeyDown={handleKeyDown}
-          className="w-full h-full p-4 font-mono text-sm bg-gray-900 text-gray-100 resize-none focus:outline-none"
+          className="w-full h-full p-4 font-mono text-sm bg-gray-900 text-gray-100 resize-none focus:outline-none overflow-auto"
           placeholder="# Nhập code Python của bạn ở đây..."
           spellCheck={false}
           style={{
             tabSize: 4,
-            minHeight: '100%',
           }}
         />
       </div>
+
+      {/* Stdin */}
+      {typeof onStdinChange === 'function' && (
+        <div className="bg-gray-800 px-4 py-3 border-t border-gray-700">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-medium text-gray-300">⌨️ Input (stdin)</span>
+            <span className="text-[11px] text-gray-500">Mỗi dòng = 1 lần input()</span>
+          </div>
+          <textarea
+            value={stdin ?? ''}
+            onChange={(e) => onStdinChange(e.target.value)}
+            className="w-full p-2 font-mono text-xs bg-gray-900 text-gray-100 resize-none focus:outline-none border border-gray-700 rounded"
+            placeholder={'Ví dụ:\n10\n5'}
+            rows={3}
+            spellCheck={false}
+          />
+        </div>
+      )}
 
       {/* Footer hint */}
       <div className="bg-gray-800 px-4 py-1.5 border-t border-gray-700">

@@ -10,15 +10,28 @@ import { runPython } from '../utils/pyodideHelper';
 const MiniGame = () => {
   const [selectedGame, setSelectedGame] = useState(miniGames[0]);
   const [code, setCode] = useState(selectedGame.starterCode);
+  const [stdin, setStdin] = useState('');
   const [output, setOutput] = useState('');
   const [error, setError] = useState(null);
   const [isRunning, setIsRunning] = useState(false);
   const [status, setStatus] = useState(null);
   const [statusMessage, setStatusMessage] = useState('');
 
+  const getDefaultInputForGame = (game) => {
+    if (!game) return '';
+    if (game.id === 1) {
+      const randomGuess = Math.floor(Math.random() * 10) + 1;
+      return String(randomGuess);
+    }
+    if (game.id === 2) return '10\n5';
+    if (game.id === 3) return 'đúng';
+    return '';
+  };
+
   // Reset code khi chọn game khác
   useEffect(() => {
     setCode(selectedGame.starterCode);
+    setStdin(getDefaultInputForGame(selectedGame));
     setOutput('');
     setError(null);
     setStatus(null);
@@ -34,21 +47,7 @@ const MiniGame = () => {
     setStatusMessage('');
 
     try {
-      // Tạo input mẫu cho game đoán số (để demo)
-      let inputString = '';
-      if (selectedGame.id === 1) {
-        // Game đoán số - dùng số ngẫu nhiên
-        const randomGuess = Math.floor(Math.random() * 10) + 1;
-        inputString = String(randomGuess);
-      } else if (selectedGame.id === 2) {
-        // Game tính nhanh
-        inputString = '10\n5';
-      } else if (selectedGame.id === 3) {
-        // Game trắc nghiệm
-        inputString = 'đúng';
-      }
-
-      const result = await runPython(code, inputString);
+      const result = await runPython(code, stdin);
 
       if (result.error) {
         setError(result.error);
@@ -133,6 +132,8 @@ const MiniGame = () => {
             onChange={setCode}
             onRun={handleRun}
             isRunning={isRunning}
+            stdin={stdin}
+            onStdinChange={setStdin}
           />
         </div>
 

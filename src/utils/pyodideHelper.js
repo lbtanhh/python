@@ -73,13 +73,12 @@ _stdout_capture = None
 
 def mock_input(prompt=""):
     global _input_queue, _stdout_capture
+    # Print prompt nếu có
+    if prompt and _stdout_capture:
+        _stdout_capture.write(str(prompt))
     if _input_queue:
-        value = _input_queue.pop(0)
-        # Print prompt nếu có
-        if prompt and _stdout_capture:
-            _stdout_capture.write(str(prompt))
-        return value
-    return ""
+        return _input_queue.pop(0)
+    raise EOFError("Chưa có input. Hãy nhập vào ô Input (stdin) (mỗi dòng = 1 lần input()).")
 
 # Override built-in input
 import builtins

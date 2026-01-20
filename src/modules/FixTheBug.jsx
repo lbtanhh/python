@@ -10,15 +10,25 @@ import { runPython } from '../utils/pyodideHelper';
 const FixTheBug = () => {
   const [selectedBug, setSelectedBug] = useState(bugFixes[0]);
   const [code, setCode] = useState(selectedBug.buggyCode);
+  const [stdin, setStdin] = useState('');
   const [output, setOutput] = useState('');
   const [error, setError] = useState(null);
   const [isRunning, setIsRunning] = useState(false);
   const [status, setStatus] = useState(null);
   const [statusMessage, setStatusMessage] = useState('');
 
+  const getDefaultInputForBug = (bug) => {
+    if (!bug) return '';
+    if (bug.id === 1 || bug.id === 2) return '6';
+    if (bug.id === 3) return '18';
+    if (bug.id === 4) return '15';
+    return '';
+  };
+
   // Reset code khi chọn bài khác
   useEffect(() => {
     setCode(selectedBug.buggyCode);
+    setStdin(getDefaultInputForBug(selectedBug));
     setOutput('');
     setError(null);
     setStatus(null);
@@ -34,20 +44,7 @@ const FixTheBug = () => {
     setStatusMessage('');
 
     try {
-      // Tạo input mẫu để test
-      let inputString = '';
-      if (selectedBug.id === 1 || selectedBug.id === 2) {
-        // Điểm số
-        inputString = '6';
-      } else if (selectedBug.id === 3) {
-        // Tuổi
-        inputString = '18';
-      } else if (selectedBug.id === 4) {
-        // Số
-        inputString = '15';
-      }
-
-      const result = await runPython(code, inputString);
+      const result = await runPython(code, stdin);
 
       if (result.error) {
         // Code vẫn còn lỗi
@@ -59,7 +56,7 @@ const FixTheBug = () => {
         setOutput(result.output);
 
         // So sánh với code đúng (chạy code đúng để lấy output mẫu)
-        const correctResult = await runPython(selectedBug.correctCode, inputString);
+        const correctResult = await runPython(selectedBug.correctCode, stdin);
         const userOutput = result.output.trim();
         const expectedOutput = correctResult.output.trim();
 
@@ -172,6 +169,8 @@ const FixTheBug = () => {
             onChange={setCode}
             onRun={handleRun}
             isRunning={isRunning}
+            stdin={stdin}
+            onStdinChange={setStdin}
           />
         </div>
 

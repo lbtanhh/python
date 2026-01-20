@@ -10,6 +10,7 @@ import { runPython } from '../utils/pyodideHelper';
 const ExerciseJudge = () => {
   const [selectedExercise, setSelectedExercise] = useState(exercises[0]);
   const [code, setCode] = useState(selectedExercise.starterCode);
+  const [stdin, setStdin] = useState('');
   const [output, setOutput] = useState('');
   const [error, setError] = useState(null);
   const [isRunning, setIsRunning] = useState(false);
@@ -18,9 +19,14 @@ const ExerciseJudge = () => {
   const [statusMessage, setStatusMessage] = useState('');
   const [testResults, setTestResults] = useState([]);
 
+  const getDefaultInputForExercise = (exercise) => {
+    return exercise?.hiddenTests?.[0]?.input || '';
+  };
+
   // Reset code khi chọn bài khác
   useEffect(() => {
     setCode(selectedExercise.starterCode);
+    setStdin(getDefaultInputForExercise(selectedExercise));
     setOutput('');
     setError(null);
     setStatus(null);
@@ -38,9 +44,7 @@ const ExerciseJudge = () => {
     setTestResults([]);
 
     try {
-      // Lấy sample input từ test đầu tiên
-      const sampleInput = selectedExercise.hiddenTests[0]?.input || '';
-      const result = await runPython(code, sampleInput);
+      const result = await runPython(code, stdin);
 
       if (result.error) {
         setError(result.error);
@@ -228,6 +232,8 @@ const ExerciseJudge = () => {
             onChange={setCode}
             onRun={handleRun}
             isRunning={isRunning || isChecking}
+            stdin={stdin}
+            onStdinChange={setStdin}
           />
         </div>
 

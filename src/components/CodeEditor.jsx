@@ -1,0 +1,88 @@
+import React, { useEffect, useRef } from 'react';
+
+/**
+ * CodeEditor Component - Editor để viết Python code
+ * Sử dụng textarea đơn giản với syntax highlighting cơ bản
+ */
+const CodeEditor = ({ code, onChange, onRun, isRunning }) => {
+  const textareaRef = useRef(null);
+
+  // Auto-resize textarea
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+    }
+  }, [code]);
+
+  // Handle Tab key để thụt lề
+  const handleKeyDown = (e) => {
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      const textarea = e.target;
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const newCode = code.substring(0, start) + '    ' + code.substring(end);
+      onChange(newCode);
+      setTimeout(() => {
+        textarea.selectionStart = textarea.selectionEnd = start + 4;
+      }, 0);
+    }
+
+    // Ctrl/Cmd + Enter để chạy code
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+      e.preventDefault();
+      onRun();
+    }
+  };
+
+  return (
+    <div className="flex flex-col h-full bg-gray-900 text-gray-100">
+      {/* Toolbar */}
+      <div className="bg-gray-800 px-4 py-2 flex items-center justify-between border-b border-gray-700">
+        <div className="flex items-center space-x-2">
+          <span className="text-sm font-medium text-gray-300">📝 Code Editor</span>
+          <span className="text-xs text-gray-500">Python</span>
+        </div>
+        <button
+          onClick={onRun}
+          disabled={isRunning}
+          className={`px-4 py-1.5 rounded-md font-medium transition-all ${
+            isRunning
+              ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+              : 'bg-green-600 hover:bg-green-700 text-white'
+          }`}
+        >
+          {isRunning ? '⏳ Đang chạy...' : '▶️ Run'}
+        </button>
+      </div>
+
+      {/* Editor */}
+      <div className="flex-1 relative overflow-auto">
+        <textarea
+          ref={textareaRef}
+          value={code}
+          onChange={(e) => onChange(e.target.value)}
+          onKeyDown={handleKeyDown}
+          className="w-full h-full p-4 font-mono text-sm bg-gray-900 text-gray-100 resize-none focus:outline-none"
+          placeholder="# Nhập code Python của bạn ở đây..."
+          spellCheck={false}
+          style={{
+            tabSize: 4,
+            minHeight: '100%',
+          }}
+        />
+      </div>
+
+      {/* Footer hint */}
+      <div className="bg-gray-800 px-4 py-1.5 border-t border-gray-700">
+        <span className="text-xs text-gray-500">
+          💡 Tip: Nhấn Ctrl/Cmd + Enter để chạy code nhanh
+        </span>
+      </div>
+    </div>
+  );
+};
+
+export default CodeEditor;
+

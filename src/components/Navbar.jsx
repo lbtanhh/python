@@ -5,10 +5,10 @@ import React from 'react';
  */
 const Navbar = ({ activeModule, setActiveModule }) => {
   const menuItems = [
-    { id: 'minigame', label: '🎮 Mini Game', icon: '🎮' },
+    // { id: 'minigame', label: '🎮 Mini Game', icon: '🎮' },
     { id: 'exercise', label: '📝 Bài Tập', icon: '📝' },
     { id: 'realworld', label: '📚 Bài Toán Đời Sống', icon: '📚' },
-    { id: 'fixbug', label: '🐛 Sai Rồi Sửa', icon: '🐛' },
+    // { id: 'fixbug', label: '🐛 Sai Rồi Sửa', icon: '🐛' },
   ];
 
   return (

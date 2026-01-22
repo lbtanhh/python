@@ -203,11 +203,48 @@ const ExerciseJudge = () => {
   const currentPartInfo = parts.find(p => p.part === selectedPart);
   const currentColor = partColors[selectedPart] || partColors[1];
 
+  // Mobile: Tab-based layout
+  const [activeTab, setActiveTab] = useState('problem'); // 'problem' | 'code' | 'output'
+
   return (
     <div className="flex flex-col h-screen">
-      <div className="flex-1 flex overflow-hidden">
+      {/* Mobile Tab Bar */}
+      <div className="md:hidden bg-gray-100 border-b border-gray-300 flex">
+        <button
+          onClick={() => setActiveTab('problem')}
+          className={`flex-1 px-4 py-3 text-sm font-medium transition-all ${
+            activeTab === 'problem'
+              ? 'bg-white text-blue-600 border-b-2 border-blue-600'
+              : 'text-gray-600 hover:text-gray-900'
+          }`}
+        >
+          📋 Bài Tập
+        </button>
+        <button
+          onClick={() => setActiveTab('code')}
+          className={`flex-1 px-4 py-3 text-sm font-medium transition-all ${
+            activeTab === 'code'
+              ? 'bg-white text-blue-600 border-b-2 border-blue-600'
+              : 'text-gray-600 hover:text-gray-900'
+          }`}
+        >
+          💻 Code
+        </button>
+        <button
+          onClick={() => setActiveTab('output')}
+          className={`flex-1 px-4 py-3 text-sm font-medium transition-all ${
+            activeTab === 'output'
+              ? 'bg-white text-blue-600 border-b-2 border-blue-600'
+              : 'text-gray-600 hover:text-gray-900'
+          }`}
+        >
+          📊 Kết quả
+        </button>
+      </div>
+
+      <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
         {/* Content Panel - Left */}
-        <div className="w-1/3 bg-white border-r border-gray-300 overflow-auto">
+        <div className={`${activeTab === 'problem' ? 'flex flex-col' : 'hidden'} md:flex w-full md:w-1/4 bg-white border-r border-gray-300 overflow-auto`}>
           <div className="p-6">
             <h1 className="text-2xl font-bold text-gray-800 mb-4">
               📝 Bài Tập Python
@@ -323,14 +360,20 @@ const ExerciseJudge = () => {
             <div className="space-y-2">
               <button
                 onClick={handleReset}
-                className="w-full px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-md font-medium transition-all"
+                className="w-full px-4 py-3 md:py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-md font-medium transition-all text-base md:text-sm"
               >
                 🔄 Reset Code
               </button>
               <button
-                onClick={handleRunAndCheck}
+                onClick={() => {
+                  handleRunAndCheck();
+                  // Auto switch to output tab on mobile after running
+                  if (window.innerWidth < 768) {
+                    setTimeout(() => setActiveTab('output'), 500);
+                  }
+                }}
                 disabled={isChecking || isRunning || !selectedExercise}
-                className={`w-full px-4 py-2 rounded-md font-medium transition-all ${
+                className={`w-full px-4 py-3 md:py-2 rounded-md font-medium transition-all text-base md:text-sm ${
                   isChecking || isRunning || !selectedExercise
                     ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
                     : 'bg-blue-600 hover:bg-blue-700 text-white'
@@ -338,12 +381,27 @@ const ExerciseJudge = () => {
               >
                 {isChecking ? '⏳ Đang chấm...' : '✅ Run & Check'}
               </button>
+              {/* Mobile: Quick switch buttons */}
+              <div className="md:hidden flex space-x-2">
+                <button
+                  onClick={() => setActiveTab('code')}
+                  className="flex-1 px-3 py-2 bg-green-100 hover:bg-green-200 text-green-800 rounded-md font-medium transition-all text-sm"
+                >
+                  → Code
+                </button>
+                <button
+                  onClick={() => setActiveTab('output')}
+                  className="flex-1 px-3 py-2 bg-purple-100 hover:bg-purple-200 text-purple-800 rounded-md font-medium transition-all text-sm"
+                >
+                  → Kết quả
+                </button>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Code Editor - Middle */}
-        <div className="w-1/3 border-r border-gray-300">
+        <div className={`${activeTab === 'code' ? 'flex flex-col h-full' : 'hidden'} md:flex w-full md:w-2/5 md:min-w-0 border-r border-gray-300`}>
           <CodeEditor
             code={code}
             onChange={setCode}
@@ -355,7 +413,7 @@ const ExerciseJudge = () => {
         </div>
 
         {/* Output Panel - Right */}
-        <div className="w-1/3">
+        <div className={`${activeTab === 'output' ? 'flex flex-col h-full' : 'hidden'} md:flex w-full md:w-[35%] md:min-w-0`}>
           <OutputPanel
             output={output}
             error={error}

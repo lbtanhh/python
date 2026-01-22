@@ -7,7 +7,7 @@ const OutputPanel = ({ output, error, status, statusMessage }) => {
   const hasOutput = output || error || statusMessage;
 
   return (
-    <div className="flex flex-col h-full bg-gray-50 border-l border-gray-300">
+    <div className="flex flex-col h-full w-full bg-gray-50 border-l border-gray-300">
       {/* Header */}
       <div className="bg-gray-200 px-4 py-2 border-b border-gray-300">
         <span className="text-sm font-medium text-gray-700">📊 Output</span>

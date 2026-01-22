@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { exercises, getParts, getSectionsByPart, getExercisesByPartAndSection } from '../data/exercises';
+import { getParts, getSectionsByPart, getExercisesByPartAndSection } from '../data/exercises';
 import CodeEditor from '../components/CodeEditor';
 import OutputPanel from '../components/OutputPanel';
 import { runPython } from '../utils/pyodideHelper';
@@ -23,10 +23,11 @@ const ExerciseJudge = () => {
 
   const parts = getParts();
 
-  // Khởi tạo: chọn phần đầu tiên và section đầu tiên
+  // Khởi tạo: chọn phần đầu tiên và section đầu tiên (chỉ chạy 1 lần khi mount)
   useEffect(() => {
-    if (parts.length > 0 && !selectedSection) {
-      const firstPart = selectedPart || parts[0].part;
+    const partsList = getParts();
+    if (partsList.length > 0) {
+      const firstPart = partsList[0].part;
       const sections = getSectionsByPart(firstPart);
       if (sections.length > 0) {
         setSelectedSection(sections[0]);
@@ -36,6 +37,7 @@ const ExerciseJudge = () => {
         }
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Khi chọn phần khác, reset về section đầu tiên
@@ -60,7 +62,7 @@ const ExerciseJudge = () => {
         setSelectedExercise(exercises[0]);
       }
     }
-  }, [selectedSection]);
+  }, [selectedPart, selectedSection]);
 
   // Khi chọn bài khác, reset code và stdin
   useEffect(() => {
